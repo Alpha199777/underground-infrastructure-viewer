@@ -1,0 +1,104 @@
+﻿{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [6.1432, 46.2044],
+          [6.1450, 46.2055],
+          [6.1470, 46.2060]
+        ]
+      },
+      "properties": {
+        "id": 1,
+        "type": "water_pipe",
+        "label": "Water Main - Rue de Rive",
+        "diameter_mm": 300,
+        "material": "ductile_iron",
+        "depth_m": 1.5,
+        "install_year": 1998,
+        "status": "active"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [6.1400, 46.2020],
+          [6.1420, 46.2035],
+          [6.1432, 46.2044]
+        ]
+      },
+      "properties": {
+        "id": 2,
+        "type": "electrical_cable",
+        "label": "HV Cable - Quai du Mont-Blanc",
+        "voltage_kv": 20,
+        "material": "XLPE",
+        "depth_m": 0.8,
+        "install_year": 2005,
+        "status": "active"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [6.1470, 46.2060],
+          [6.1490, 46.2070],
+          [6.1510, 46.2065]
+        ]
+      },
+      "properties": {
+        "id": 3,
+        "type": "telecom",
+        "label": "Fiber Optic - Rue du Rhone",
+        "capacity_gb": 100,
+        "material": "fiber",
+        "depth_m": 0.6,
+        "install_year": 2018,
+        "status": "active"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [6.1380, 46.2010],
+          [6.1400, 46.2020],
+          [6.1420, 46.2015]
+        ]
+      },
+      "properties": {
+        "id": 4,
+        "type": "sewer",
+        "label": "Storm Sewer - Plainpalais",
+        "diameter_mm": 600,
+        "material": "concrete",
+        "depth_m": 2.5,
+        "install_year": 1975,
+        "status": "maintenance"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1432, 46.2044]
+      },
+      "properties": {
+        "id": 5,
+        "type": "junction_box",
+        "label": "Junction Box - Place du Molard",
+        "depth_m": 1.2,
+        "install_year": 2010,
+        "status": "active"
+      }
+    }
+  ]
+}
