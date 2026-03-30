@@ -49,7 +49,7 @@ Open \rontend/index.html\ in your browser.
 
 ## Sprint Progress
 - [x] Sprint 1 - Architecture and Project Setup
-- [ ] Sprint 2 - Database and Geospatial Data
-- [ ] Sprint 3 - API Geospatial Endpoints
-- [ ] Sprint 4 - Map Layers and Feature Interaction
-- [ ] Sprint 5 - Deployment
+- [x] Sprint 2 - Database and Geospatial Data
+- [x] Sprint 3 - Map Layers and Feature Interaction
+- [x] Sprint 4 - Polish and UI
+- [x] Sprint 5 - GitHub and Deployment
