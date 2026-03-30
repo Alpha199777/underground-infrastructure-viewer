@@ -1,5 +1,6 @@
 ﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api import infrastructure
 
 app = FastAPI(
     title='Underground Infrastructure Viewer',
@@ -7,7 +8,6 @@ app = FastAPI(
     version='0.1.0'
 )
 
-# CORS middleware - allows frontend to communicate with backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -15,6 +15,8 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+app.include_router(infrastructure.router, prefix="/api")
 
 @app.get('/')
 def root():
