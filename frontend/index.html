@@ -51,10 +51,62 @@
             border-radius: 50%;
             margin-right: 8px;
         }
+        #controls {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            z-index: 1;
+            font-size: 12px;
+        }
+        #controls strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+        .control-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            cursor: pointer;
+        }
+        .control-item input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        .maplibregl-popup-content {
+            background: #1a1a2e;
+            color: white;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            min-width: 200px;
+        }
+        .maplibregl-popup-tip {
+            border-top-color: #1a1a2e !important;
+        }
+        .popup-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #00aaff;
+        }
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+        }
+        .popup-label { color: #aaaaaa; }
+        .popup-value { color: #ffffff; font-weight: bold; }
+        .status-active { color: #00ff88; }
+        .status-maintenance { color: #ffdd00; }
     </style>
 </head>
 <body>
     <div id='title-bar'>Underground Infrastructure Viewer - Geneva</div>
+
     <div id='legend'>
         <strong>Infrastructure</strong>
         <div class='legend-item'><div class='legend-color' style='background:#00aaff'></div>Water Pipe</div>
@@ -63,6 +115,31 @@
         <div class='legend-item'><div class='legend-color' style='background:#8B4513'></div>Sewer</div>
         <div class='legend-item'><div class='legend-dot' style='background:#00ff88'></div>Junction Box</div>
     </div>
+
+    <div id='controls'>
+        <strong>Layer Controls</strong>
+        <div class='control-item'>
+            <input type='checkbox' id='toggle-water' checked>
+            <label for='toggle-water'>Water Pipe</label>
+        </div>
+        <div class='control-item'>
+            <input type='checkbox' id='toggle-electrical' checked>
+            <label for='toggle-electrical'>Electrical Cable</label>
+        </div>
+        <div class='control-item'>
+            <input type='checkbox' id='toggle-telecom' checked>
+            <label for='toggle-telecom'>Telecom</label>
+        </div>
+        <div class='control-item'>
+            <input type='checkbox' id='toggle-sewer' checked>
+            <label for='toggle-sewer'>Sewer</label>
+        </div>
+        <div class='control-item'>
+            <input type='checkbox' id='toggle-junction' checked>
+            <label for='toggle-junction'>Junction Box</label>
+        </div>
+    </div>
+
     <div id='map'></div>
 
     <script>
@@ -76,27 +153,43 @@
         map.addControl(new maplibregl.NavigationControl());
         map.addControl(new maplibregl.ScaleControl());
 
-        // Color mapping per infrastructure type
-        const typeColors = {
-            'water_pipe':       '#00aaff',
-            'electrical_cable': '#ffdd00',
-            'telecom':          '#ff6600',
-            'sewer':            '#8B4513',
-            'junction_box':     '#00ff88'
-        };
+        function buildPopupHTML(props) {
+            const statusClass = props.status === 'active' ? 'status-active' : 'status-maintenance';
+            return `
+                <div class='popup-title'>${props.label}</div>
+                <div class='popup-row'>
+                    <span class='popup-label'>Type</span>
+                    <span class='popup-value'>${props.type}</span>
+                </div>
+                <div class='popup-row'>
+                    <span class='popup-label'>Material</span>
+                    <span class='popup-value'>${props.material || 'N/A'}</span>
+                </div>
+                <div class='popup-row'>
+                    <span class='popup-label'>Depth</span>
+                    <span class='popup-value'>${props.depth_m}m</span>
+                </div>
+                <div class='popup-row'>
+                    <span class='popup-label'>Installed</span>
+                    <span class='popup-value'>${props.install_year}</span>
+                </div>
+                <div class='popup-row'>
+                    <span class='popup-label'>Status</span>
+                    <span class='popup-value ${statusClass}'>${props.status}</span>
+                </div>
+            `;
+        }
 
         map.on('load', async () => {
-            // Fetch GeoJSON from FastAPI
             const response = await fetch('http://127.0.0.1:8000/api/infrastructure');
             const data = await response.json();
 
-            // Add data source
             map.addSource('infrastructure', {
                 type: 'geojson',
                 data: data
             });
 
-            // LINE layer for pipes/cables
+            // LINE layer
             map.addLayer({
                 id: 'infrastructure-lines',
                 type: 'line',
@@ -116,7 +209,7 @@
                 }
             });
 
-            // POINT layer for junction boxes
+            // POINT layer
             map.addLayer({
                 id: 'infrastructure-points',
                 type: 'circle',
@@ -130,49 +223,67 @@
                 }
             });
 
-            // CLICK interaction - lines
+            // CLICK - lines
             map.on('click', 'infrastructure-lines', (e) => {
                 const props = e.features[0].properties;
                 new maplibregl.Popup()
                     .setLngLat(e.lngLat)
-                    .setHTML(`
-                        <strong>${props.label}</strong><br>
-                        Type: ${props.type}<br>
-                        Material: ${props.material}<br>
-                        Depth: ${props.depth_m}m<br>
-                        Installed: ${props.install_year}<br>
-                        Status: ${props.status}
-                    `)
+                    .setHTML(buildPopupHTML(props))
                     .addTo(map);
             });
 
-            // CLICK interaction - points
+            // CLICK - points
             map.on('click', 'infrastructure-points', (e) => {
                 const props = e.features[0].properties;
                 new maplibregl.Popup()
                     .setLngLat(e.lngLat)
-                    .setHTML(`
-                        <strong>${props.label}</strong><br>
-                        Type: ${props.type}<br>
-                        Depth: ${props.depth_m}m<br>
-                        Installed: ${props.install_year}<br>
-                        Status: ${props.status}
-                    `)
+                    .setHTML(buildPopupHTML(props))
                     .addTo(map);
             });
 
-            // Cursor change on hover
-            map.on('mouseenter', 'infrastructure-lines', () => {
-                map.getCanvas().style.cursor = 'pointer';
+            // Cursor hover
+            ['infrastructure-lines', 'infrastructure-points'].forEach(layer => {
+                map.on('mouseenter', layer, () => map.getCanvas().style.cursor = 'pointer');
+                map.on('mouseleave', layer, () => map.getCanvas().style.cursor = '');
             });
-            map.on('mouseleave', 'infrastructure-lines', () => {
-                map.getCanvas().style.cursor = '';
-            });
-            map.on('mouseenter', 'infrastructure-points', () => {
-                map.getCanvas().style.cursor = 'pointer';
-            });
-            map.on('mouseleave', 'infrastructure-points', () => {
-                map.getCanvas().style.cursor = '';
+
+            // Layer toggle controls
+            const toggles = {
+                'toggle-water':      { layer: 'infrastructure-lines', type: 'water_pipe' },
+                'toggle-electrical': { layer: 'infrastructure-lines', type: 'electrical_cable' },
+                'toggle-telecom':    { layer: 'infrastructure-lines', type: 'telecom' },
+                'toggle-sewer':      { layer: 'infrastructure-lines', type: 'sewer' },
+                'toggle-junction':   { layer: 'infrastructure-points', type: 'junction_box' }
+            };
+
+            // Track visible types
+            const visibleTypes = new Set([
+                'water_pipe', 'electrical_cable', 'telecom', 'sewer', 'junction_box'
+            ]);
+
+            Object.entries(toggles).forEach(([id, config]) => {
+                document.getElementById(id).addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        visibleTypes.add(config.type);
+                    } else {
+                        visibleTypes.delete(config.type);
+                    }
+
+                    // Update line filter
+                    const lineTypes = [...visibleTypes].filter(t => t !== 'junction_box');
+                    map.setFilter('infrastructure-lines',
+                        lineTypes.length > 0
+                            ? ['in', ['get', 'type'], ['literal', lineTypes]]
+                            : ['==', ['get', 'type'], '']
+                    );
+
+                    // Update point filter
+                    map.setFilter('infrastructure-points',
+                        visibleTypes.has('junction_box')
+                            ? ['==', ['get', 'type'], 'junction_box']
+                            : ['==', ['get', 'type'], '']
+                    );
+                });
             });
         });
     </script>
