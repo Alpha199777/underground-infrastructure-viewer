@@ -2,13 +2,33 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.db.database import get_db
+from pydantic import BaseModel
+from typing import Any, Optional
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.get("/infrastructure")
+class InfrastructureProperties(BaseModel):
+    id: int
+    type: str
+    label: str
+    material: Optional[str]
+    depth_m: float
+    install_year: int
+    status: str
+
+class InfrastructureFeature(BaseModel):
+    type: str
+    geometry: Any
+    properties: InfrastructureProperties
+
+class FeatureCollection(BaseModel):
+    type: str
+    features: list[InfrastructureFeature]
+
+@router.get("/infrastructure", response_model=FeatureCollection)
 def get_infrastructure(db: Session = Depends(get_db)):
     logger.info("GET /api/infrastructure called")
     query = text("""
