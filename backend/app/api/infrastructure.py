@@ -2,11 +2,15 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.db.database import get_db
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 @router.get("/infrastructure")
 def get_infrastructure(db: Session = Depends(get_db)):
+    logger.info("GET /api/infrastructure called")
     query = text("""
         SELECT 
             id, type, label, material, 
