@@ -1,0 +1,3 @@
+{
+  "customInstructions": "This is a FastAPI and GIS project. The backend source code is located in the /backend folder. The project is deployed to Railway using Docker."
+}
