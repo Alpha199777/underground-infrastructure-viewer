@@ -1,6 +1,9 @@
-﻿from fastapi import FastAPI, Request
+﻿from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from app.db.database import get_db
 from app.api import infrastructure
 import logging
 import os
@@ -43,5 +46,10 @@ def root():
     return {'status': 'ok', 'message': 'Underground Infrastructure Viewer API'}
 
 @app.get('/health')
-def health():
-    return {'status': 'healthy'}
+def health(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "ok"}
+    except Exception as exc:
+        logger.error("Health check failed: %s", exc)
+        return JSONResponse(status_code=500, content={"status": "error"})

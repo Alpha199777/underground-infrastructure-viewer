@@ -180,8 +180,10 @@
             `;
         }
 
+        const API_BASE_URL = "https://underground-infra-api-production.up.railway.app";
+
         map.on('load', async () => {
-            const response = await fetch('https://underground-infra-api-production.up.railway.app/api/infrastructure');
+            const response = await fetch(`${API_BASE_URL}/api/infrastructure`);
             const data = await response.json();
 
             map.addSource('infrastructure', {
