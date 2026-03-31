@@ -1,18 +1,21 @@
-# 1. Image de base Python
 FROM python:3.11-slim
 
-# 2. On définit le répertoire de travail interne au serveur
+# Installation des dépendances système pour PostGIS/Psycopg2
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# 3. On copie le fichier requirements depuis le dossier backend local
-COPY backend/requirements.txt .
+# On force la copie spécifique du fichier pour être sûr que Docker le voit
+COPY backend/requirements.txt /app/requirements.txt
 
-# 4. Installation des dépendances
-RUN pip install --no-cache-dir -r requirements.txt
+# On installe depuis le chemin absolu dans le conteneur
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# 5. On copie tout le contenu du dossier backend local vers le serveur
-COPY backend/ .
+# On copie tout le reste du backend
+COPY backend/ /app/
 
-# 6. Lancement de l'application
-# (main:app car main.py sera maintenant à la racine de /app sur le serveur)
+# On lance Uvicorn en pointant sur le dossier courant
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
