@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import infrastructure
 import logging
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -10,11 +11,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    "https://underground-infrastructure-viewer.vercel.app",
-]
+_raw_origins = os.environ.get("ALLOWED_ORIGINS", "")
+ALLOWED_ORIGINS = (
+    [o.strip() for o in _raw_origins.split(",") if o.strip()]
+    or ["http://127.0.0.1:5500", "http://localhost:5500"]
+)
 
 app = FastAPI(
     title='Underground Infrastructure Viewer',
